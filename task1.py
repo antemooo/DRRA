@@ -4,18 +4,24 @@
 # 1. make tokenizing of the data: first separate the data into sentences and each sentence is a list of words
 # 2. remove stop words in the each sentences
 # 3. use stem on each word in each sentence
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from csv_helper import load_csv
 from nltk.tokenize import TweetTokenizer
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.corpus import stopwords
+from kmeans import kmeans
+import matplotlib.pyplot as plt
 from optparse import OptionParser
+from euclidean_distance import euclidean_vectorized
+from euclidean_distance import cosin_vectorized
+
 import re
 
 
 def remove_urls(vTEXT):
     vTEXT = re.sub(r'(https|http)?:\/\/(\w|\.|\/|\?|\=|\&|\%)*\b', '', vTEXT, flags=re.MULTILINE)
-    return (vTEXT)
+    return vTEXT
 
 
 tweets = load_csv("Tweets_2016London.csv")
@@ -38,7 +44,7 @@ tweets_tokenize = tokenizate(tweets)
 # print(tweets_tokenize)
 
 
-def stopWordsRemoval(sentence):
+def stop_words_removal(sentence):
     english_stopwords = stopwords.words('english')
     english_punctuations = [',', '.', ':', ';', '?', '(', ')', '[', ']', '&', '!', '*', '@', '#', '$', '%', '-', '_',
                             '___', '__', '"', '/', '...', ",", "∞", "'", 'ö']
@@ -70,27 +76,50 @@ def stemming(sentence):
 tweet_clean = list([])
 for tweet in tweets_tokenize:
     # remove all the stop words in each tweet sentences
-    tweet_svr = stopWordsRemoval(tweet)
+    tweet_svr = stop_words_removal(tweet)
     # stem each word in these tweet sentences
     tweet_s = stemming(tweet_svr)
     # add the clean tweets into the list
     tweet_clean.append(tweet_s)
 
-print(tweet_clean)
+# print(tweet_clean)
+
 
 # ############################################################################# #
 
 # Part 2
 # Section 1 imply the TF-IDF
 
-tweets_clean = list([])
-for tweet in tweet_clean:
-    tweet = ''.join(tweet)
-    tweet_clean += tweet
+# Combine single words in each tweet
+def combine(clean_tweet):
+    tweets_combine = []
+    for tweet_list in clean_tweet:
+        tweet_combine = ' '.join(tweet_list)
+        tweets_combine.append(tweet_combine)
+    return tweets_combine
 
 
-tfidf = TfidfVectorizer(max_df=0.5, min_df=2, stop_words='english')
-X = tfidf.fit_transform(tweets_clean)
-print(X)
-# print(X)
-# Section 2 imply the k-means algorithm
+# get the combined tweet content
+tweets_combine = combine(tweet_clean)
+
+# get the vectorizer of TF-IDF
+vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, stop_words='english')
+
+X = vectorizer.fit_transform(tweets)
+# print("n_samples: %d, n_features: %d" % X.shape)
+
+# Task 2.1 imply the k-means algorithm
+
+
+num_clusters = 5
+print(X.shape)
+cluster_labels, centroids = kmeans(X, num_clusters)
+
+# labels = ["cluster_"+str(x) for x in range(num_clusters)]
+# population = [np.sum(cluster_labels == x) for x in range(num_clusters)]
+# y_pos = np.arange(len(labels))
+# barlist = plt.bar(y_pos, population, align='center',width=0.3)
+# plt.xticks(y_pos, labels)
+# plt.ylabel('Number of examples')
+# plt.title('Sklearn digits dataset.')
+# plt.show()
