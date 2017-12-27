@@ -10,11 +10,10 @@ from csv_helper import load_csv
 from nltk.tokenize import TweetTokenizer
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.corpus import stopwords
+import scipy.sparse.linalg
+from sklearn.cluster import KMeans
 from kmeans import kmeans
-import matplotlib.pyplot as plt
-from optparse import OptionParser
-from euclidean_distance import euclidean_vectorized
-from euclidean_distance import cosin_vectorized
+
 
 import re
 
@@ -82,8 +81,6 @@ for tweet in tweets_tokenize:
     # add the clean tweets into the list
     tweet_clean.append(tweet_s)
 
-# print(tweet_clean)
-
 
 # ############################################################################# #
 
@@ -112,10 +109,12 @@ X = vectorizer.fit_transform(tweets)
 
 
 num_clusters = 5
-print(X.shape)
-cluster_labels, centroids = kmeans(X, num_clusters)
+# X_new = scipy.sparse.linalg.inv(X)
+# print(X_new)
+X_new = X.todense()
 
-# labels = ["cluster_"+str(x) for x in range(num_clusters)]
+# cluster_labels, centroids = kmeans(X_new, num_clusters)
+
 # population = [np.sum(cluster_labels == x) for x in range(num_clusters)]
 # y_pos = np.arange(len(labels))
 # barlist = plt.bar(y_pos, population, align='center',width=0.3)
