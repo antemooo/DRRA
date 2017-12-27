@@ -15,7 +15,6 @@ from sklearn.cluster import KMeans
 from kmeans import kmeans
 import matplotlib.pyplot as plt
 
-
 import re
 
 
@@ -102,29 +101,106 @@ tweets_combine = combine(tweet_clean)
 
 # get the vectorizer of TF-IDF
 vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, stop_words='english')
-
-X = vectorizer.fit_transform(tweets)
+print(tweets_combine)
+# print(tweets)
+X = vectorizer.fit_transform(tweets_combine)
 
 # print("n_samples: %d, n_features: %d" % X.shape)
 
 # Task 2.1 imply the k-means algorithm
 
 
-num_clusters = 5
 # X_new = scipy.sparse.linalg.inv(X)
 # print(X_new)
 X_new = X.todense()
 
+
 # print("X_new shape is:", X_new.shape)
-cluster_labels, centroids = kmeans(X_new, num_clusters)
+
+# Section 2.1: k means
+# cluster_labels, centroids = kmeans(X_new, num_clusters)
 # print(cluster_labels)
 # print(centroids)
 
-labels = ["cluster_"+str(x) for x in range(num_clusters)]
-population = [np.sum(cluster_labels == x) for x in range(num_clusters)]
-y_pos = np.arange(len(labels))
-barlist = plt.bar(y_pos, population, align='center',width=0.3)
-plt.xticks(y_pos, labels)
-plt.ylabel('Number of examples')
-plt.title('Sklearn digits dataset.')
-plt.show()
+# labels = ["cluster_"+str(x) for x in range(num_clusters)]
+# population = [np.sum(cluster_labels == x) for x in range(num_clusters)]
+# y_pos = np.arange(len(labels))
+# barlist = plt.bar(y_pos, population, align='center',width=0.3)
+# plt.xticks(y_pos, labels)
+# plt.ylabel('Number of examples')
+# plt.title('Sklearn digits dataset.')
+# plt.show()
+
+#############
+
+# Section 2.2: Consensus Matrix:
+def consensus_cluster(X, cluster_from, cluster_to):
+    consensus_matrix = np.zeros((X.shape[0], X.shape[0]))
+    clusters = list([])
+    print("consensus matrix is", consensus_matrix.shape)
+    for k in range(cluster_from, cluster_to + 1):
+        cluster_labels, centroids = kmeans(X, k)
+        cluster_labels_new = np.squeeze(np.asarray(cluster_labels))
+        clusters.append(cluster_labels_new)
+    for i in range(0, X.shape[0]):
+        for j in range(0, X.shape[0]):
+            count = 0
+            for cluster in clusters:
+                if cluster[i] == cluster[j]:
+                    count += 1
+            consensus_matrix[i, j] = count
+    return consensus_matrix
+
+
+consensus_matrix = consensus_cluster(X_new, 2, 10)
+
+
+# print(consensus_matrix)
+
+
+def consensus_noise_noise(consensus_matrix):
+    consensus_matrix_new = consensus_matrix / consensus_matrix[0, 0]
+    consensus_matrix_new[consensus_matrix_new < 0.1] = 0
+    noise = np.zeros(consensus_matrix.shape[0])
+    threshold = consensus_matrix_new.sum() / consensus_matrix_new.shape[0]
+    for i in range(consensus_matrix_new.shape[0]):
+        a = sum(consensus_matrix_new[i, :])
+        if a < threshold:
+            noise[i] = 1
+    return noise
+
+
+noise = consensus_noise_noise(consensus_matrix)
+
+
+# print(noise)
+
+
+def clean_tweet_noise(tweets, noise):
+    if len(tweets) == len(noise):
+        tweets_new = list([])
+        for i in range(len(noise)):
+            if noise[i] == 0:
+                tweets_new.append(tweets[i])
+        return tweets_new
+
+
+tweets_new_clean = clean_tweet_noise(tweet_clean, noise)
+# print(len(tweets_new_clean))
+
+############
+tweets_combine_new = combine(tweets_new_clean)
+# print(tweets_combine_new)
+
+# get the vectorizer of TF-IDF
+vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, stop_words='english')
+
+# the new data cleaned via kmeans and consensus matrix
+X1 = vectorizer.fit_transform(tweets_combine_new)
+# print(X1)
+X1_new = X1.todense()
+
+consensus_matrix1 = consensus_cluster(X1_new, 2, 12)
+
+print(consensus_matrix1)
+
