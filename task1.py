@@ -13,6 +13,7 @@ from nltk.corpus import stopwords
 import scipy.sparse.linalg
 from sklearn.cluster import KMeans
 from kmeans import kmeans
+import matplotlib.pyplot as plt
 
 
 import re
@@ -103,6 +104,7 @@ tweets_combine = combine(tweet_clean)
 vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, stop_words='english')
 
 X = vectorizer.fit_transform(tweets)
+
 # print("n_samples: %d, n_features: %d" % X.shape)
 
 # Task 2.1 imply the k-means algorithm
@@ -113,12 +115,16 @@ num_clusters = 5
 # print(X_new)
 X_new = X.todense()
 
-# cluster_labels, centroids = kmeans(X_new, num_clusters)
+# print("X_new shape is:", X_new.shape)
+cluster_labels, centroids = kmeans(X_new, num_clusters)
+# print(cluster_labels)
+# print(centroids)
 
-# population = [np.sum(cluster_labels == x) for x in range(num_clusters)]
-# y_pos = np.arange(len(labels))
-# barlist = plt.bar(y_pos, population, align='center',width=0.3)
-# plt.xticks(y_pos, labels)
-# plt.ylabel('Number of examples')
-# plt.title('Sklearn digits dataset.')
-# plt.show()
+labels = ["cluster_"+str(x) for x in range(num_clusters)]
+population = [np.sum(cluster_labels == x) for x in range(num_clusters)]
+y_pos = np.arange(len(labels))
+barlist = plt.bar(y_pos, population, align='center',width=0.3)
+plt.xticks(y_pos, labels)
+plt.ylabel('Number of examples')
+plt.title('Sklearn digits dataset.')
+plt.show()
