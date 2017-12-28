@@ -4,15 +4,19 @@
 # 1. make tokenizing of the data: first separate the data into sentences and each sentence is a list of words
 # 2. remove stop words in the each sentences
 # 3. use stem on each word in each sentence
+import csv
+
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from csv_helper import load_csv
 from nltk.tokenize import TweetTokenizer
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.corpus import stopwords
-import scipy.sparse.linalg
+from tqdm import tqdm
 from sklearn.cluster import KMeans
-from kmeans import kmeans
+from sklearn.cluster import DBSCAN
+# from kmeans import kmeans
+# from kmeans import kmeans2
 import matplotlib.pyplot as plt
 
 import re
@@ -46,13 +50,14 @@ tweets_tokenize = tokenizate(tweets)
 def stop_words_removal(sentence):
     english_stopwords = stopwords.words('english')
     english_punctuations = [',', '.', ':', ';', '?', '(', ')', '[', ']', '&', '!', '*', '@', '#', '$', '%', '-', '_',
-                            '___', '__', '"', '/', '...', ",", "∞", "'", 'ö']
+                            '___', '__', '"', '/', '...', ",", "∞", "'", 'ö', '\\', '__']
     content = list([])
 
     for word in sentence:
         if (word.lower() not in english_stopwords) & (word not in english_punctuations):
             word = re.sub(r'[^\w]', '', word)  # remove signs in a word
             word = re.sub(r'\w*\d\w*', '', word).strip()  # remove all the words that contains digits
+            word = word.encode('ascii', 'ignore').decode('ascii')
             if not word.isdigit():
                 if word != '':
                     content.append(word)
@@ -101,7 +106,7 @@ tweets_combine = combine(tweet_clean)
 
 # get the vectorizer of TF-IDF
 vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, stop_words='english')
-print(tweets_combine)
+# print(tweets_combine)
 # print(tweets)
 X = vectorizer.fit_transform(tweets_combine)
 
@@ -110,7 +115,7 @@ X = vectorizer.fit_transform(tweets_combine)
 # Task 2.1 imply the k-means algorithm
 
 
-# X_new = scipy.sparse.linalg.inv(X)
+
 # print(X_new)
 X_new = X.todense()
 
@@ -118,12 +123,12 @@ X_new = X.todense()
 # print("X_new shape is:", X_new.shape)
 
 # Section 2.1: k means
-# cluster_labels, centroids = kmeans(X_new, num_clusters)
+# cluster_labels, centroids = kmeans(X_new, 5)
 # print(cluster_labels)
 # print(centroids)
 
-# labels = ["cluster_"+str(x) for x in range(num_clusters)]
-# population = [np.sum(cluster_labels == x) for x in range(num_clusters)]
+# labels = ["cluster_"+str(x) for x in range(5)]
+# population = [np.sum(cluster_labels == x) for x in range(5)]
 # y_pos = np.arange(len(labels))
 # barlist = plt.bar(y_pos, population, align='center',width=0.3)
 # plt.xticks(y_pos, labels)
@@ -137,12 +142,13 @@ X_new = X.todense()
 def consensus_cluster(X, cluster_from, cluster_to):
     consensus_matrix = np.zeros((X.shape[0], X.shape[0]))
     clusters = list([])
-    print("consensus matrix is", consensus_matrix.shape)
+    # print("consensus matrix is", consensus_matrix.shape)
     for k in range(cluster_from, cluster_to + 1):
-        cluster_labels, centroids = kmeans(X, k)
+        kmeans = KMeans(n_clusters=k, random_state=0).fit(X)
+        cluster_labels = kmeans.labels_
         cluster_labels_new = np.squeeze(np.asarray(cluster_labels))
         clusters.append(cluster_labels_new)
-    for i in range(0, X.shape[0]):
+    for i in tqdm(range(0, X.shape[0])):
         for j in range(0, X.shape[0]):
             count = 0
             for cluster in clusters:
@@ -158,7 +164,7 @@ consensus_matrix = consensus_cluster(X_new, 2, 10)
 # print(consensus_matrix)
 
 
-def consensus_noise_noise(consensus_matrix):
+def consensus_noise(consensus_matrix):
     consensus_matrix_new = consensus_matrix / consensus_matrix[0, 0]
     consensus_matrix_new[consensus_matrix_new < 0.1] = 0
     noise = np.zeros(consensus_matrix.shape[0])
@@ -170,10 +176,9 @@ def consensus_noise_noise(consensus_matrix):
     return noise
 
 
-noise = consensus_noise_noise(consensus_matrix)
+noise = consensus_noise(consensus_matrix)
 
-
-# print(noise)
+print(noise)
 
 
 def clean_tweet_noise(tweets, noise):
@@ -186,21 +191,100 @@ def clean_tweet_noise(tweets, noise):
 
 
 tweets_new_clean = clean_tweet_noise(tweet_clean, noise)
-# print(len(tweets_new_clean))
+print(len(tweets_new_clean))
 
-############
+
+##########
+# Section 2.3: DBSCAN
+
+def DBSCAN_matrix(X, eps_from, eps_to):
+    db_matrix = np.zeros((X.shape[0], eps_to - eps_from + 1))
+    j = 0
+    for eps in tqdm(range(eps_from, eps_to + 1)):
+        db = DBSCAN(eps=1, min_samples=eps).fit(X)
+        core_index = db.core_sample_indices_
+        for x in core_index:
+            db_matrix[x - 1, j] = 1
+        j = j + 1
+    return db_matrix
+
+
+# db = DBSCAN(eps=1, min_samples=20).fit(X_new)
+# print(len(db.core_sample_indices_), db.core_sample_indices_)
+# print(db.labels_)
+#
+# db_matrix = DBSCAN_matrix(X_new, 5, 15)
+# print(db_matrix)
+
+
+def db_noise(db_matrix):
+    noise = np.sum(np.square(db_matrix), axis=1) / db_matrix.shape[1]
+    noise_new = list([])
+    for i in noise:
+        if i > 0:
+            noise_new.append(1)
+        else:
+            noise_new.append(0)
+
+    return noise_new
+
+
+# noise2 = db_noise(db_matrix)
+
+# print(noise2)
+###########################################################################
+
 tweets_combine_new = combine(tweets_new_clean)
 # print(tweets_combine_new)
-
-# get the vectorizer of TF-IDF
-vectorizer = TfidfVectorizer(max_df=0.5, min_df=2, stop_words='english')
 
 # the new data cleaned via kmeans and consensus matrix
 X1 = vectorizer.fit_transform(tweets_combine_new)
 # print(X1)
 X1_new = X1.todense()
+# print(X1_new)
+
+# print(X1_new.shape)
 
 consensus_matrix1 = consensus_cluster(X1_new, 2, 12)
+#
+# print(consensus_matrix1)
+#
+kmeans1 = KMeans(n_clusters=9, random_state=0).fit(X1_new)
+cluster_labels_new = kmeans1.labels_
 
-print(consensus_matrix1)
+
+print(len(cluster_labels_new))
+
+
+
+
+#############################################################################
+
+# Part 4
+
+def generate_cluster(tweets_clean, cluster_number, cluster_labels):
+    # all the tweets needs to be write into 9 files
+    all_tweets_cluster = list([])
+    for x in range(cluster_number):
+        cluster_tweets = list([])
+        all_tweets_cluster.append(cluster_tweets)
+    #
+    for cluster_index in range(len(cluster_labels)):
+        cluster = cluster_labels[cluster_index]
+        tweet_info = tweets_clean[cluster_index]
+        tweet_info_new = []
+        for b in tweet_info:
+            tweet_info_new.append(b)
+        all_tweets_cluster[cluster - 1].append(tweet_info_new)
+    i = 1
+    for a in all_tweets_cluster:
+        cluster_name = 'cluster_' + str(i) + '.csv'
+        i = i + 1
+        with open(cluster_name, 'w') as f:
+            f_csv = csv.writer(f)
+            f_csv.writerows(a)
+
+
+generate_cluster(tweets_new_clean, 9, cluster_labels_new)
+
 
