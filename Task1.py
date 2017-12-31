@@ -85,7 +85,8 @@ for tweet in tweets_tokenize:
     # stem each word in these tweet sentences
     tweet_s = stemming(tweet_svr)
     # add the clean tweets into the list
-    tweet_clean.append(tweet_s)
+    if len(tweet_s) != 0: # to judge is this tweet empty?
+        tweet_clean.append(tweet_s)
 
 
 # ############################################################################# #
@@ -333,39 +334,61 @@ node = generate_node(most_words, cluster_labels_new, 'kmeans_node')
 
 
 #
-def generate_edge(cluster_numbers, cluster_label, name, consensus_matrix, threshold):
+def generate_edge(name, consensus_matrix, cluster_label):
+    index_list = list([])
+    # for a in range(9):
+    #     same_cluster = [index for index in range(len(cluster_label)) if cluster_label[index] == a]
+    #     index_list.append(same_cluster)
     source = list([])
     target = list([])
-    consensus_matrix_new = np.zeros((consensus_matrix.shape[0], consensus_matrix.shape[0]))
-    weight = list([])
-    # for i in range(consensus_matrix.shape[0]):
-    #     for j in range(consensus_matrix.shape[0]):
-    #         if consensus_matrix[i, j] > threshold:
-    #
-    #
-    #             # print(len(what))
-    #             consensus_matrix_new[i, j] = 1
-    # print(consensus_matrix_new.sum())
-
-    for cluster in tqdm(range(cluster_numbers)):
-        indexes = [index for index in range(len(cluster_label)) if
-                   cluster_label[index] == cluster]  # all the index in this cluster
-        for current_source in indexes:  # get current source
-            # current_target = list([])
-            for index in indexes:
-                if index > current_source:
-                #     if consensus_matrix_new[index, current_source] == 1:
-                        # print(consensus_matrix[index, current_source])
-                        target.append(index + 1)
-                        source.append(current_source + 1)
-                        # weight.append(consensus_matrix[index, current_source])
+    threshold = 8
+    for i in range(consensus_matrix.shape[0]):
+        for j in range(consensus_matrix.shape[1]):
+            if (consensus_matrix[i, j] > threshold)and (i < j):
+                # for clusters in index_list:
+                #     if i in clusters and j in clusters:
+                        source.append(i + 1)
+                        target.append(j + 1)
 
     df = pd.DataFrame({'Source': source, 'Target': target})
     df.to_csv(name + '.csv', mode='w', index=False)
     return df
 
 
+# def generate_edge(cluster_numbers, cluster_label, name, consensus_matrix, threshold):
+#############################
+# source = list([])
+# target = list([])
+# consensus_matrix_new = np.zeros((consensus_matrix.shape[0], consensus_matrix.shape[0]))
+# weight = list([])
+# for i in range(consensus_matrix.shape[0]):
+#     for j in range(consensus_matrix.shape[0]):
+#         if consensus_matrix[i, j] > threshold:
+#
+#
+#             # print(len(what))
+#             consensus_matrix_new[i, j] = 1
+# print(consensus_matrix_new.sum())
+
+# for cluster in tqdm(range(cluster_numbers)):
+#     indexes = [index for index in range(len(cluster_label)) if
+#                cluster_label[index] == cluster]  # all the index in this cluster
+#     for current_source in indexes:  # get current source
+#         # current_target = list([])
+#         for index in indexes:
+#             if index > current_source:
+#             #     if consensus_matrix_new[index, current_source] == 1:
+#                     # print(consensus_matrix[index, current_source])
+#                     target.append(index + 1)
+#                     source.append(current_source + 1)
+#                     # weight.append(consensus_matrix[index, current_source])
+#
+# df = pd.DataFrame({'Source': source, 'Target': target})
+# df.to_csv(name + '.csv', mode='w', index=False)
+# return df
+
+
 
 
 # edge = generate_edge(9, cluster_labels_new, 'kmeans_edge?', consensus_matrix1, 0)
-edge = generate_edge(9, cluster_labels_new, 'kmeans_edge', consensus_matrix1, 8)
+edge = generate_edge('kmeans_edge_new', consensus_matrix1, cluster_labels_new)
