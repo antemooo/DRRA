@@ -2,8 +2,9 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.cluster import KMeans
 from sklearn.cluster import DBSCAN
+# This file contains the functions that achieve DBSCAN and clean the noise of DBSCAN
 
-
+# This function is to get the DBSCAN matrix, and the eps from means the least eps and the eps_to means the largest
 def DBSCAN_matrix(X, eps_from, eps_to):
     db_matrix = np.zeros((X.shape[0], eps_to - eps_from + 1))
     j = 0
@@ -15,7 +16,7 @@ def DBSCAN_matrix(X, eps_from, eps_to):
         j = j + 1
     return db_matrix
 
-
+# This function is to clean up the noise via DBSCAN, and the threshold is 0.5
 def db_noise(db_matrix):
     noise = np.sum(np.square(db_matrix), axis=1) / db_matrix.shape[1]
     noise_new = list([])

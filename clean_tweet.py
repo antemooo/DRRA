@@ -5,14 +5,14 @@ from nltk.corpus import stopwords
 import re
 
 
+# This file contains all the methods that clean the useless information inside a tweet:
+
+# This function is to remove the URLs inside a line of words
 def remove_urls(vTEXT):
     vTEXT = re.sub(r'(https|http)?:\/\/(\w|\.|\/|\?|\=|\&|\%)*\b', '', vTEXT, flags=re.MULTILINE)
     return vTEXT
 
-
-tweets = load_csv("Tweets_2016London.csv")
-
-
+# Tokenizate words in a Tweet, which will return a list which contains lists that contain words in a sentence
 def tokenizate(tweets):
     tknzer = TweetTokenizer(strip_handles=True, reduce_len=True, preserve_case=True)
     tokens = list([])
@@ -23,13 +23,7 @@ def tokenizate(tweets):
             tokens.append(token)
     return tokens
 
-
-tweets_tokenize = tokenizate(tweets)
-
-
-# print(tweets_tokenize)
-
-
+# Remove all the stop words which is not useful, and also remove the punctuations
 def stop_words_removal(sentence):
     english_stopwords = stopwords.words('english')
     english_punctuations = [',', '.', ':', ';', '?', '(', ')', '[', ']', '&', '!', '*', '@', '#', '$', '%', '-', '_',
@@ -46,7 +40,7 @@ def stop_words_removal(sentence):
                     content.append(word)
     return content
 
-
+# This function is to stem all the words, eg: loving and love can be stemmed as lov
 def stemming(sentence):
     st = LancasterStemmer()
     content = list([])
@@ -57,8 +51,6 @@ def stemming(sentence):
 
 
 # tokenize the original tweets information into few sentences
-# tweets_tokenize = tokenizate(tweets)
-# print(tweets_tokenize)
 # call the final tweets tweet_clean
 def clean_tweet(tweets_tokenize):
     tweet_clean = list([])
@@ -68,11 +60,13 @@ def clean_tweet(tweets_tokenize):
         # stem each word in these tweet sentences
         tweet_s = stemming(tweet_svr)
         # add the clean tweets into the list
-        if len(tweet_s) != 0: # to judge is this tweet empty?
+        if len(tweet_s) != 0:  # to judge is this tweet empty?
             tweet_clean.append(tweet_s)
     return tweet_clean
 
-# Combine single words in each tweet
+
+# Combine single words in each tweet, which will return a list that contains all the words in a tweet, this function is
+# for TF-IDF
 def combine(clean_tweet):
     tweets_combine = []
     for tweet_list in clean_tweet:
