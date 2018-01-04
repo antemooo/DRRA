@@ -3,8 +3,8 @@ import pandas as pd
 from tqdm import tqdm
 # This file is to cluster all the tweets
 
-# This function is to make a cluster of tweets and generate a CSV file, the tweets_clean stands for the data we have
-# the cluster_number stands for the data cluster number we need and the cluster_labels stands for the labels we got,
+# This function is to make a cluster of tweets and generate a CSV file, the tweets_clean stands for the old_data we have
+# the cluster_number stands for the old_data cluster number we need and the cluster_labels stands for the labels we got,
 # it's a list of clusters of each tweet, the name is the name of this file
 def generate_cluster(tweets_clean, cluster_number, cluster_labels, name):
     # all the tweets needs to be write into 9 files

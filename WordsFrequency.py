@@ -1,7 +1,7 @@
-# This file contains 3 methods, and the cluster_words will be used for the main.py, which is used to find the words
+# This file contains 3 methods, and the cluster_words will be used in the main.py to find the words
 # appeared mostly in a CSV file
 
-# Count every words in a tweet, and the result looks like {words: count number}
+# Count every words in a tweet, and the result is a dictionary like {words: count number}
 def countWords(tweets):
     wordDict = {}
     for line in tweets:
@@ -12,7 +12,7 @@ def countWords(tweets):
                 wordDict[word] = 1
     return wordDict
 
-# Find the word most common in the result from count words function
+# Find the most common word in a dictionary (the result of count words function)
 def findMostCommon(charDict):
     mostFreq = ''
     mostFreqCount = 0
@@ -23,6 +23,9 @@ def findMostCommon(charDict):
     return mostFreq
 
 # Find the most common words in a cluster
+# Takes a cluster group
+# for each cluster find the most common word
+# returns a list of common words in a cluster group
 def cluster_words(cluster_group):
     most_words = list([])
 

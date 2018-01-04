@@ -65,8 +65,8 @@ def clean_tweet(tweets_tokenize):
     return tweet_clean
 
 
-# Combine single words in each tweet, which will return a list that contains all the words in a tweet, this function is
-# for TF-IDF
+# Combine single words in each tweet, which will return a list that contains all the words in a tweet
+# This function is for TF-IDF
 def combine(clean_tweet):
     tweets_combine = []
     for tweet_list in clean_tweet:

@@ -1,7 +1,7 @@
 # Part 1 data cleaning
-# In this part, my target is to make process of my data
+# In this part, my target is to make process of my old_data
 # To achieve my target, I need to write 3 methods below:
-# 1. make tokenizing of the data: first separate the data into sentences and each sentence is a list of words
+# 1. make tokenizing of the old_data: first separate the old_data into sentences and each sentence is a list of words
 # 2. remove stop words in the each sentences
 # 3. use stem on each word in each sentence
 import csv
@@ -237,7 +237,7 @@ def db_noise(db_matrix):
 tweets_combine_new = combine(tweets_new_clean)
 # print(tweets_combine_new)
 
-# the new data cleaned via kmeans and consensus matrix
+# the new old_data cleaned via kmeans and consensus matrix
 X1 = vectorizer.fit_transform(tweets_combine_new)
 # print(X1)
 X1_new = X1.todense()

@@ -38,13 +38,13 @@ def plot_embedding(X, title=None):
         plt.title(title)
 
 
-# load digits dataset with 5 classes. The dataset has 10 classes in total, so you can can the amount of data as you like.
+# load digits dataset with 5 classes. The dataset has 10 classes in total, so you can can the amount of old_data as you like.
 digits = load_digits(n_class=5)
 X = digits.data
 y = digits.target
 n_samples, n_features = X.shape
 
-print("data shape: ",X.shape)
+print("old_data shape: ",X.shape)
 print("class shape: ",y.shape)
 
 # plot some images of the digits
@@ -76,11 +76,11 @@ plot_embedding(X_tsne,
 
 plt.show()
 
-# Optional: There are many techniques to reduce data dimensionality for visualization. You can try PCA as introduced in
+# Optional: There are many techniques to reduce old_data dimensionality for visualization. You can try PCA as introduced in
 # the lecture.
 
 # Step 2: Implement k-means. In this step, you are provided the function for calculating distances between two matrices.
-# and you will implement k-means algorithm. The algorithm returns cluster labels of your data and the centroids of these
+# and you will implement k-means algorithm. The algorithm returns cluster labels of your old_data and the centroids of these
 # clusters.
 
 # This is the vectorized version of function calculating the Euclidean distance between to matrice. You had implemented
@@ -97,7 +97,7 @@ def euclidean_vectorized(A, B):
     return distances
 
 
-# X: data matrix of size (n_samples,n_features)
+# X: old_data matrix of size (n_samples,n_features)
 # n_clusters: number of clusters
 # output 1: labels of X with size (n_samples,)
 # output 2: centroids of clusters
@@ -144,7 +144,7 @@ def kmeans(X, n_clusters):
     return labels, centroids
 
 
-# Step 3: Use k-means to cluster your data and visualize your data
+# Step 3: Use k-means to cluster your old_data and visualize your old_data
 from sklearn.cluster import KMeans
 num_clusters = 5
 # model = KMeans(n_clusters=num_clusters)

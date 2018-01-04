@@ -17,11 +17,11 @@ def DBSCAN_matrix(X, eps_from, eps_to):
     return db_matrix
 
 # This function is to clean up the noise via DBSCAN, and the threshold is 0.5
-def db_noise(db_matrix):
+def db_noise(db_matrix, threshold):
     noise = np.sum(np.square(db_matrix), axis=1) / db_matrix.shape[1]
     noise_new = list([])
     for i in noise:
-        if i > 0.5:
+        if i > threshold:
             noise_new.append(0)
         else:
             noise_new.append(1)

@@ -3,8 +3,9 @@ from tqdm import tqdm
 from sklearn.cluster import KMeans
 
 
-# This function is to get the consensus matrix of different KMeans with different K, and the value of each element is
-# how many times the value is same, the cluster from stands for the least k and teh cluster to stands for the largest k
+# This function is to get the consensus matrix of different KMeans with different K.
+# The value of each element is how many times the value is same
+# The "cluster_from" stands for the least k and the "cluster_to" stands for the largest k
 def consensus_cluster(X, cluster_from, cluster_to):
     consensus_matrix = np.zeros((X.shape[0], X.shape[0]))
     clusters = list([])
@@ -24,7 +25,10 @@ def consensus_cluster(X, cluster_from, cluster_to):
     return consensus_matrix
 
 
-# This function is to find the noise of consensus
+# This function is to find the noise of the consensus matrix.
+# if the value is less than the threshold, its position will be set to 1 in the noise vector.
+# otherwise its position is set to 0 in the noise vector.
+# the result is a noise vectore that indicates the positions of noise.
 def consensus_noise(consensus_matrix):
     consensus_matrix_new = consensus_matrix / consensus_matrix[0, 0]
     consensus_matrix_new[consensus_matrix_new < 0.1] = 0
@@ -37,7 +41,8 @@ def consensus_noise(consensus_matrix):
     return noise
 
 
-# Clean up the noise in the tweets
+# Clean up the noise in the tweets.
+# excluding all the values that are set to 1 in the noise vector.
 def clean_tweet_noise(tweets, noise):
     if len(tweets) == len(noise):
         tweets_new = list([])
