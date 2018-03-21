@@ -1,7 +1,7 @@
 # DRRA
-Data computing and storage architecture project
+Data representation and reduction analysis
 
-Copyright ©VUB - Distributed computing and storage architecture course 2017.
+Copyright ©VUB - Data representation and reduction analysis course 2017.
 
 **Authors:** 
 - **Ahmed K. A Abdullah @github/antemooo.**
